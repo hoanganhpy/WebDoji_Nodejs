@@ -1,66 +1,55 @@
-# 💍 WebDoji — Jewelry Store (Node.js + Express)
+# 💍 WebDoji — Jewelry Store
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
-![Express](https://img.shields.io/badge/Express-4.18-000000?style=flat-square&logo=express&logoColor=white)
-![EJS](https://img.shields.io/badge/EJS-B4CA65?style=flat-square)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)
+![EJS](https://img.shields.io/badge/EJS-server--rendered-B4CA65)
+![MySQL](https://img.shields.io/badge/MySQL%20%2F%20MariaDB-4479A1?logo=mysql&logoColor=white)
+![Chart.js](https://img.shields.io/badge/Chart.js-4-FF6384?logo=chartdotjs&logoColor=white)
 
-A full-stack web shop for gold and jewelry, server-rendered with Express and EJS on a MySQL database. It has a customer storefront and an admin dashboard with daily and date-range sales statistics.
+An online store for gold, silver and diamond jewelry with a customer storefront and a back-office for staff. Server-rendered with Express and EJS on MySQL, styled with a custom ivory-and-gold design system.
 
-<p align="center">
-  <img src="docs/screenshots/home.png" alt="Storefront" width="100%"/>
-</p>
+![Storefront](docs/screenshots/home.jpg)
 
-| Product detail | Cart & checkout |
+| Product page | Cart & checkout |
 |---|---|
-| ![Product detail](docs/screenshots/product-detail.png) | ![Cart](docs/screenshots/cart.png) |
+| ![Product](docs/screenshots/product-detail.jpg) | ![Cart](docs/screenshots/cart.jpg) |
+| **Category listing** | **Order details** |
+| ![Category](docs/screenshots/category.jpg) | ![Order](docs/screenshots/order-detail.jpg) |
 
-| Admin — products | Admin — orders |
+| Admin dashboard | Sales statistics |
 |---|---|
-| ![Admin products](docs/screenshots/admin-products.png) | ![Admin orders](docs/screenshots/admin-orders.png) |
+| ![Dashboard](docs/screenshots/admin-dashboard.jpg) | ![Statistics](docs/screenshots/admin-stats.jpg) |
+| **Order management** | **Mobile** |
+| ![Orders](docs/screenshots/admin-orders.jpg) | ![Mobile](docs/screenshots/mobile.jpg) |
 
-## ✨ Features
+## Features
 
 **Customer** (`/customer`)
-- Browse by product type and origin, product detail, search
-- Cart: add, update quantity, remove; checkout with province / district / ward picker
-- Current orders, order details and purchase history
+- Home page with featured piece, category tiles and per-category collections
+- Browse by category or origin, search, product page with stock status and quantity stepper
+- Cart with live badge, checkout with province → district → ward picker (cash on delivery)
+- Order tracking: current orders, history, order details; cancel a pending order (items return to stock)
 - Sign up, log in, change password
 
 **Admin** (`/admin`)
-- Manage products (with image upload), product types and origins — create / update / delete / show / hide
-- Manage orders: view details, confirm or cancel
-- Manage customers: view purchases, lock / unlock accounts
-- Sales statistics for today or a custom date range (Google Charts)
+- Dashboard: today's and 30-day revenue, pending orders, low-stock alert, 7-day revenue chart, best sellers, latest orders
+- Products, categories and origins: create / edit / delete / show / hide, image upload
+- Orders: confirm or cancel (cancelling restocks); customers: view purchases, lock / unlock
+- Sales statistics for any date range with charts
 
-## 🧱 Tech stack
+## Run locally
 
-| | |
-|---|---|
-| Runtime | Node.js, Express 4 |
-| Views | EJS + express-ejs-layouts, Bootstrap |
-| Database | MySQL 5.7+ / 8 or MariaDB (`mysql2`) |
-| Other | express-session, cookie-parser (signed cookies), express-fileupload |
-
-Structured as MVC: `route/` → `controller/` → `model/` (SQL queries) → `views/`.
-
-## ▶️ Run locally
+Requires Node.js 18+ and MySQL 5.7+/8 or MariaDB.
 
 ```bash
 git clone https://github.com/hoanganhpy/WebDoji_Nodejs.git
 cd WebDoji_Nodejs
 npm install
 
-# create the database and tables
-mysql -u root -p < database/schema.sql
-
-# load demo data (wipes existing data in dojin_nodejs)
-npm run db:seed
-
-npm start
+mysql -u root -p < database/schema.sql   # create database and tables
+npm run db:seed                          # demo data (wipes existing data)
+npm start                                # http://localhost:3000
 ```
-
-Open http://localhost:3000/customer/home
 
 | Role | URL | Username | Password |
 |---|---|---|---|
@@ -69,29 +58,31 @@ Open http://localhost:3000/customer/home
 
 ### Configuration
 
-All settings have local defaults and can be overridden with environment variables:
-
 | Variable | Default |
 |---|---|
-| `DB_HOST` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` | `localhost` / `root` / *(empty)* / `dojin_nodejs` |
+| `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` / `DB_NAME` | `localhost` / `3306` / `root` / *(empty)* / `dojin_nodejs` |
 | `SESSION_SECRET` | `change-me-in-production` — **set this in production** |
 | `PORT` | `3000` |
 
-## 🔧 Changelog — 2026 maintenance pass
+In production run it under a process manager (pm2, systemd or Docker with a restart policy): on an unrecoverable database error the app logs and exits so it can be restarted cleanly.
 
-- **Security:** login cookie is now signed and only holds the user id/name (it previously stored the whole account row and could be forged)
-- **Security:** cart and checkout now take prices, stock and order totals from the database instead of trusting form fields
-- **Fix:** checkout form could never be submitted (an empty hidden `required` field blocked it)
-- **Fix:** carts were kept in a shared in-memory array, so one user's order could include another user's items
-- **Fix:** change password always failed (read a session value that was never set)
-- **Fix:** locked customer accounts could still log in
-- **Fix:** replaced MySQL `PASSWORD()` (removed in MySQL 8) with `SHA2(…, 256)` — accounts created with the old hash need their password reset. Unsalted SHA-256 is still not ideal; bcrypt is the next step.
-- **Fix:** unknown routes now return HTTP 404; prices display as VND (`12.500.000 ₫`)
-- **UI:** visible quantity input on product page, compact header, local logo instead of a hotlinked one
-- **Repo:** added `database/schema.sql` + seed script; `node_modules` no longer committed
+## Engineering notes
+
+- **MVC structure:** `route/` → `controller/` → `model/` (SQL) → `views/` (EJS)
+- **Security:** signed login cookie with minimal payload, server-side prices and totals, ownership checks on orders, Helmet security headers with a Content-Security-Policy, login rate limiting, no hard-coded credentials
+- **Reliability:** MySQL connection pool, central error handler, 404 page with correct status
+- **No CDN dependencies:** Bootstrap Icons, Chart.js and fonts are served from `node_modules`
+- **Responsive** storefront and admin
+
+## 🔧 Changelog
+
+**2026 — redesign & hardening**
+- New storefront and admin UI (design system, sidebar admin, Chart.js dashboards instead of Google Charts)
+- Fixed: customers could open other customers' orders; hidden products were still reachable; sign-up crashed on duplicate usernames; menus were cached at startup; cancelled orders were counted in revenue; admin cancel didn't restock; checkout form could never be submitted; carts were shared between users; prices could be changed from the browser; login cookie could be forged; change password never worked; locked accounts could still log in; `PASSWORD()` broke on MySQL 8
+- Added `database/schema.sql`, demo seed, security headers, rate limiting, connection pool; removed committed `node_modules`
 
 ## 👥 Team
 
-- Trần Hoàng Anh
-- Võ Bá Thành Nhân
-- Nguyễn Đức Đạo
+University group project by Trần Hoàng Anh, Võ Bá Thành Nhân and Nguyễn Đức Đạo; 2026 redesign by Trần Hoàng Anh.
+
+> Product photos are demo assets from the original student project and are not licensed for commercial use. Replace them before running a real store.

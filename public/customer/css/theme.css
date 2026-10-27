@@ -267,3 +267,4 @@ h1, h2, h3, .serif, .price, .line-total, .num, .stats b, .summary-row b, .hero-v
   .hero-visual { order: -1; }
   .pd h1 { font-size: 30px; }
 }
+.pd > *, .cart-layout > *, .hero .container-x > * { min-width: 0; }
