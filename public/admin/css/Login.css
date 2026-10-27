@@ -6,8 +6,9 @@
 .register-photo .image-holder {
     display: table-cell;
     width: auto;
-    background: url(../../Robin.jpg);
-    background-size: cover
+    background:
+        url(../image/sp-gnddddy060011-nhan-kim-cuong-vang-14k-pnj-1.png) center / 70% no-repeat,
+        linear-gradient(135deg, #fbf6ea 0%, #ead9a8 100%)
 }
 
 .form-container{

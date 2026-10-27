@@ -28,7 +28,7 @@
                         <td><%= dem += 1 %></td>
                         <td><%= data.TenSanPham %></td>
                         <td><%= data.XuatXu %></td>
-                        <td><%= number_format(data.DonGia) %> <sup>$</sup></td>
+                        <td><%= vnd(data.DonGia) %> <sup>₫</sup></td>
                         <td>
                             <form action="/customer/cart/update" method="post">
                                 <input class="input_table" type="number" name="SoLuong" value="<%= data.SoLuong %>" min="1" max="<%= data.SoLuongSpTrongKho + data.SoLuong %>" oninput="this.value = Math.abs(this.value)" required>
@@ -37,7 +37,7 @@
                                 <input type="submit" value="Cập nhật">
                             </form>
                         </td>
-                        <td><%= number_format(data.ThanhTien) %> <sup>$</sup></td>
+                        <td><%= vnd(data.ThanhTien) %> <sup>₫</sup></td>
                         <td>
                             <form action="/customer/cart/delete" method="post">
                                 <input type="text" hidden name="idCart" value="<%= data.ID %>">
@@ -51,7 +51,7 @@
                 }) %>
                 <tfoot>
                     <td colspan="5" style="text-align: right; border-right: 1px solid #333;">Tổng:</td>
-                    <td><%= number_format(tong) %> <sup>$</sup></td>
+                    <td><%= vnd(tong) %> <sup>₫</sup></td>
                     <td></td>
                 </tfoot>
         <% } %>
@@ -86,17 +86,17 @@
                 <p>Điện thoại: <span>*</span></p><input class="input_cart" type="tel" name="sdt" maxlength="10" pattern="[0-9]{10}" required>
             </div>
             <div class="item_donhang">
-                <p>Tỉnh/thành phố: <span>*</span></p><select class="" id="city" aria-label=".form-select-sm" name="tinhtp">
+                <p>Tỉnh/thành phố: <span>*</span></p><select class="" id="city" aria-label=".form-select-sm" required name="tinhtp">
                     <option value="" selected></option>
                 </select>
             </div>
             <div class="item_donhang">
-                <p>Quận huyện: <span>*</span></p><select class="" id="district" aria-label=".form-select-sm" name="quanhuyen">
+                <p>Quận huyện: <span>*</span></p><select class="" id="district" aria-label=".form-select-sm" required name="quanhuyen">
                     <option value="" selected></option>
                 </select>
             </div>
             <div class="item_donhang">
-                <p>Xã: <span>*</span></p><select class="" id="ward" aria-label=".form-select-sm" name="xa">
+                <p>Xã: <span>*</span></p><select class="" id="ward" aria-label=".form-select-sm" required name="xa">
                     <option value="" selected></option>
                 </select>
             </div>
@@ -107,9 +107,9 @@
                 <p style="align-self: flex-start;">Ghi chú: </p><textarea name="ghi_chu" id="" cols="30" rows="10" maxlength="200" placeholder="Tối đa 200 ký tự"></textarea>
             </div>
             <% if(dataCart[0]) { %>
-                <input type="number" value="<%= tong %>" hidden name="tongThanhTien">
+                
             <% } else { %>
-                <input type="text" hidden required>
+                
             <% } %>
             <div style="margin-bottom: 10px; margin-left: 10%;">
                 <button type="button" class="btn btn-success"><a href="/customer/home" style="text-decoration: none;">Tiếp tục mua hàng</a></button>

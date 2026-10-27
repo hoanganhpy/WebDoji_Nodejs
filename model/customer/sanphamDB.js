@@ -79,37 +79,36 @@ function isCart(callback, idTk, idSp) {
 }
 
 function addToCart(callback, data, idTk) {
-    // console.log(data);
-    // console.log(data.SoLuongCo-data.SoLuongMua);
-    // console.log(data.idSp);
-    isCart((dataCart) => {
-        console.log(data);
-        if(!dataCart[0]){
-            connection.query(
-                'INSERT INTO giohang(IDTK, IDSanPham, TenSanPham, XuatXu, DonGia, SoLuong, ThanhTien) VALUES (?,?,?,?,?,?,?) ; ' + 
-                'UPDATE sanpham SET SoLuong = ? WHERE ID = ?',
-                [idTk, data.idSp, data.TenSP, data.XuatXu, data.DonGia, data.SoLuongMua, data.DonGia*data.SoLuongMua, data.SoLuongCo-data.SoLuongMua, data.idSp],
-                function(err, results) {
-                    if(err) throw err;
-                    return callback(results);
-                }
-              );
-        }else{
-            connection.query(
-                'UPDATE giohang SET SoLuong=SoLuong + ?,ThanhTien=DonGia * SoLuong WHERE IDTK = ? AND IDSanPham = ? ;' + 
-                'UPDATE sanpham SET SoLuong= ? WHERE ID = ?',
-                [data.SoLuongMua, idTk, data.idSp, data.SoLuongCo-data.SoLuongMua, data.idSp],
-                function(err, results) {
-                    if(err) throw err;
-                    return callback(results);
-                }
-              );
+    // Price, name and stock are read from the database, never trusted from the form.
+    const qty = parseInt(data.SoLuongMua, 10);
+    if (!(qty > 0)) return callback(null);
+    connection.query(
+        'SELECT sanpham.TenSanPham, sanpham.GiaBan, sanpham.SoLuong, xuatxu.XuatXu FROM sanpham ' +
+        'INNER JOIN xuatxu ON xuatxu.ID = sanpham.XuatXu WHERE sanpham.ID = ?',
+        [data.idSp],
+        function(err, rows) {
+            if(err) throw err;
+            const sp = rows[0];
+            if (!sp || sp.SoLuong < qty) return callback(null);
+            isCart((dataCart) => {
+                const sql = !dataCart[0]
+                    ? 'INSERT INTO giohang(IDTK, IDSanPham, TenSanPham, XuatXu, DonGia, SoLuong, ThanhTien) VALUES (?,?,?,?,?,?,?) ; '
+                    : 'UPDATE giohang SET SoLuong = SoLuong + ?, ThanhTien = DonGia * SoLuong WHERE IDTK = ? AND IDSanPham = ? ; ';
+                const params = !dataCart[0]
+                    ? [idTk, data.idSp, sp.TenSanPham, sp.XuatXu, sp.GiaBan, qty, sp.GiaBan * qty]
+                    : [qty, idTk, data.idSp];
+                connection.query(
+                    sql + 'UPDATE sanpham SET SoLuong = SoLuong - ? WHERE ID = ?',
+                    params.concat([qty, data.idSp]),
+                    function(err, results) {
+                        if(err) throw err;
+                        return callback(results);
+                    }
+                );
+            }, idTk, data.idSp);
         }
-    }, idTk, data.idSp);
+    );
 }
-
-var arrCart = [];
-var arrCartRow = [];
 
 function getCart(callback, idTk) {
     connection.query(
@@ -117,70 +116,44 @@ function getCart(callback, idTk) {
         [idTk],
         function(err, results) {
             if(err) throw err;
-            results.forEach(data => {
-                arrCartRow.push(data.IDSanPham);
-                arrCartRow.push(data.SoLuong);
-                arrCartRow.push(data.ThanhTien);
-                arrCart.push(arrCartRow);
-                arrCartRow = [];
-            });
             return callback(results);
         }
       );
 }
 
 function updateCart(callback, idTk, data){
-    let SoLuong = Number(data.SoLuong);
-    let SoLuongBanDau = Number(data.SoLuongBanDau);
-    if(SoLuong<SoLuongBanDau){
-        let subtraction = SoLuongBanDau - SoLuong;
-        connection.query(
-            'UPDATE giohang SET SoLuong = ?,ThanhTien = DonGia * SoLuong WHERE IDTK = ? AND IDSanPham = ? ;' + 
-            'UPDATE sanpham SET SoLuong = SoLuong + ? WHERE ID = ?',
-            [SoLuong, idTk, data.idSanPham, subtraction, data.idSanPham],
-            function(err, results) {
-                if(err) throw err;
-                return callback(results);
-            }
-        );
-    }
-    if(SoLuong>SoLuongBanDau){
-        let addition  = SoLuong - SoLuongBanDau;
-        connection.query(
-            'UPDATE giohang SET SoLuong = ?,ThanhTien = DonGia * SoLuong WHERE IDTK = ? AND IDSanPham = ? ;' + 
-            'UPDATE sanpham SET SoLuong = SoLuong - ? WHERE ID = ?',
-            [SoLuong, idTk, data.idSanPham, addition, data.idSanPham],
-            function(err, results) {
-                if(err) throw err;
-                return callback(results);
-            }
-        );
-    }
-    if(SoLuong == SoLuongBanDau){
-        return callback();
-    }
-}
-
-function deleteCart(callback, data) {
+    // The previous quantity comes from the database, so stock can't be inflated from the form.
+    const SoLuong = parseInt(data.SoLuong, 10);
+    if (!(SoLuong > 0)) return callback();
     connection.query(
-        ' DELETE FROM giohang WHERE giohang.ID = ? ; ' + 
-        ' UPDATE sanpham SET SoLuong = SoLuong + ? WHERE ID = ? ',
-        [data.idCart, data.SoLuong, data.idSp],
-        function(err, results) {
+        'SELECT giohang.SoLuong, sanpham.SoLuong AS TonKho FROM giohang INNER JOIN sanpham ON sanpham.ID = giohang.IDSanPham ' +
+        'WHERE giohang.IDTK = ? AND giohang.IDSanPham = ?',
+        [idTk, data.idSanPham],
+        function(err, rows) {
             if(err) throw err;
-            return callback(results);
+            if (!rows[0]) return callback();
+            const diff = SoLuong - rows[0].SoLuong;          // > 0: take more from stock, < 0: give back
+            if (diff === 0 || diff > rows[0].TonKho) return callback();
+            connection.query(
+                'UPDATE giohang SET SoLuong = ?, ThanhTien = DonGia * SoLuong WHERE IDTK = ? AND IDSanPham = ? ;' +
+                'UPDATE sanpham SET SoLuong = SoLuong - ? WHERE ID = ?',
+                [SoLuong, idTk, data.idSanPham, diff, data.idSanPham],
+                function(err, results) {
+                    if(err) throw err;
+                    return callback(results);
+                }
+            );
         }
-      );
+    );
 }
 
-function selectFirstId(callback, idTk, data){
-    let diachi = data.DiaChiCuThe + ' - ' + data.xa + ' - ' + data.quanhuyen + ' - ' + data.tinhtp;
+function deleteCart(callback, data, idTk) {
+    // Restock using the quantity stored in the cart, only for the owner's cart row.
     connection.query(
-        'INSERT INTO hoadon(IDTK, TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, TrangThai) ' +
-        'VALUES (?, ?, ?, ?, ?, NOW(),?, 1) ; ',
-        [
-            idTk, data.ho_ten, diachi, data.sdt, data.tongThanhTien, data.ghi_chu
-        ],
+        'UPDATE sanpham INNER JOIN giohang ON giohang.IDSanPham = sanpham.ID ' +
+        'SET sanpham.SoLuong = sanpham.SoLuong + giohang.SoLuong WHERE giohang.ID = ? AND giohang.IDTK = ? ; ' +
+        'DELETE FROM giohang WHERE ID = ? AND IDTK = ?',
+        [data.idCart, idTk, data.idCart, idTk],
         function(err, results) {
             if(err) throw err;
             return callback(results);
@@ -189,24 +162,30 @@ function selectFirstId(callback, idTk, data){
 }
 
 function orderCart(callback, data, idTk) {
-    selectFirstId((data) => {
-        for (let index = 0; index < arrCart.length; index++) {
-            arrCart[index].splice(0, 0, data.insertId);
-        }
+    // Each order is built from this user's cart in the database (not a shared in-memory array),
+    // and the total is computed server-side.
+    connection.query('SELECT IDSanPham, SoLuong, ThanhTien FROM giohang WHERE IDTK = ?', [idTk], function(err, cart) {
+        if(err) throw err;
+        if (!cart.length) return callback(null);
+        const total = cart.reduce((sum, row) => sum + Number(row.ThanhTien), 0);
+        const diachi = [data.DiaChiCuThe, data.xa, data.quanhuyen, data.tinhtp].join(' - ');
         connection.query(
-            'INSERT INTO cthoadon(ID_HoaDon, IDSanPham, SoLuong, ThanhTien) ' +
-            'VALUES ? ;' + 
-            'DELETE FROM giohang WHERE IDTK = ?',
-            [
-                arrCart, idTk
-            ],
-            function(err, results) {
+            'INSERT INTO hoadon(IDTK, TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, TrangThai) VALUES (?, ?, ?, ?, ?, NOW(), ?, 1)',
+            [idTk, data.ho_ten, diachi, data.sdt, total, data.ghi_chu],
+            function(err, hd) {
                 if(err) throw err;
-                arrCart = [];
-                return callback(results);
+                const lines = cart.map(row => [hd.insertId, row.IDSanPham, row.SoLuong, row.ThanhTien]);
+                connection.query(
+                    'INSERT INTO cthoadon(ID_HoaDon, IDSanPham, SoLuong, ThanhTien) VALUES ? ; DELETE FROM giohang WHERE IDTK = ?',
+                    [lines, idTk],
+                    function(err, results) {
+                        if(err) throw err;
+                        return callback(results);
+                    }
+                );
             }
-          );
-    }, idTk, data);
+        );
+    });
 }
 
 function donHang(callback, idTk) {

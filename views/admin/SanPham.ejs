@@ -128,10 +128,10 @@
                 <%= data.TenSanPham %>
             </td>
             <td>
-                <%= data.GiaNhap %>
+                <%= vnd(data.GiaNhap) %>
             </td>
             <td>
-                <%= data.GiaBan %>
+                <%= vnd(data.GiaBan) %>
             </td>
             <td>
                 <%= data.SoLuong %>
@@ -318,8 +318,8 @@
                             <input type="text" value="<%= data.imgName %>" name="imgName" hidden>
                         </td>
                         <td><%= data.TenSanPham %></td>
-                        <td><%= data.GiaNhap %></td>
-                        <td><%= data.GiaBan %></td>
+                        <td><%= vnd(data.GiaNhap) %></td>
+                        <td><%= vnd(data.GiaBan) %></td>
                         <td><%= data.SoLuong %></td>
                         <td>
                             <% if(data.Ngay <10 ) { %> 0<%= data.Ngay %> <% } else { %> <%= data.Ngay %> <% } %> -

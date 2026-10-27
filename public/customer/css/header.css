@@ -13,11 +13,12 @@
 
 .nav-item {
     align-self: center;
-    font-size: 30px;
+    font-size: 18px;
+    white-space: nowrap;
 }
 
 .dropdown-menu {
-    font-size: 30px;
+    font-size: 17px;
     background: rgba(252, 252, 252, 0.5);
 }
 

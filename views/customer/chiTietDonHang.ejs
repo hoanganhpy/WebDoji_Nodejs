@@ -21,7 +21,7 @@
             <td><%= dataDonHang[0].TenKH %></td>
             <td><%= dataDonHang[0].DiaChi %></td>
             <td><%= dataDonHang[0].SDT %></td>
-            <td><%= number_format(dataDonHang[0].TongTien) %> <sup>$</sup></td>
+            <td><%= vnd(dataDonHang[0].TongTien) %> <sup>₫</sup></td>
             <td><%= dataDonHang[0].NgayMua %></td>
             <td><%= dataDonHang[0].GhiChu %></td>
             <td><%= dataDonHang[0].TenTT %></td>
@@ -51,9 +51,9 @@
                 <td><%= dem += 1 %></td>
                 <td><%= data.TenSanPham %></td>
                 <td><%= data.XuatXu %></td>
-                <td><%= number_format(data.DonGia) %> <sup>$</sup></td>
+                <td><%= vnd(data.DonGia) %> <sup>₫</sup></td>
                 <td><%= data.SoLuong %></td>
-                <td><%= number_format(data.ThanhTien) %> <sup>$</sup></td>
+                <td><%= vnd(data.ThanhTien) %> <sup>₫</sup></td>
             </tr>
         <% }) %>
     </table>

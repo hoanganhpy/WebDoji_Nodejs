@@ -6,7 +6,7 @@ const sanphamController = require('../../controller/customer/sanphamController')
 const route = express.Router()
 
 function isLogin(req, res, next){
-    if (req.cookies.dataLogin){
+    if (req.signedCookies.dataLogin){
         next();
     }else{
         res.redirect('/customer/login');
@@ -20,8 +20,8 @@ const initCustomerRouter = (app) => {
     route.get('/signup', loginController.viewSignup);
     route.post('/signup', loginController.postSignup);
 
-    route.get('/changePass', loginController.changePass);
-    route.post('/changePass', loginController.postChangePass);
+    route.get('/changePass', isLogin, loginController.changePass);
+    route.post('/changePass', isLogin, loginController.postChangePass);
 
     route.get('/home', homeController.getHome);
 

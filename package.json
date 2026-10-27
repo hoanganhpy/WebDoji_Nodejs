@@ -1,11 +1,12 @@
 {
   "name": "webDojin",
   "version": "1.0.0",
-  "description": "",
+  "description": "Jewelry store web app with customer storefront and admin dashboard (Express, EJS, MySQL)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --inspect index.js"
+    "start": "node index.js",
+    "dev": "nodemon --inspect index.js",
+    "db:seed": "node database/seed.js"
   },
   "author": "Anh",
   "license": "ISC",

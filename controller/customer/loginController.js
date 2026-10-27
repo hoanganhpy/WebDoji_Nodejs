@@ -14,12 +14,15 @@ let postLogin = (req, res) => {
             res.render('customer/loginCustomer.ejs', {layout: 'customer/loginCustomer.ejs', dataLogin: 'Sai tài khoản hoặc mật khẩu'});
             res.end();
         }
+        else if (data[0].TrangThai == 0) {
+            res.render('customer/loginCustomer.ejs', {layout: 'customer/loginCustomer.ejs', dataLogin: 'Tài khoản đã bị khóa'});
+            res.end();
+        }
         else{
-            // req.session.isLogin = true;
-            
-            res.cookie('dataLogin', data[0], {
+            res.cookie('dataLogin', { ID: data[0].ID, TenTK: data[0].TenTK }, {
                 httpOnly: true,
-                
+                signed: true,
+                sameSite: 'lax'
             });
             res.redirect('/customer/home');
             res.end();
@@ -79,10 +82,10 @@ let postChangePass = (req, res) => {
                 loginDB.postChangePass((dataChange) => {
                     res.redirect('/customer/login');
                     res.end();
-                }, pass, req.session.IDTK)
+                }, pass, req.signedCookies.dataLogin)
             }
         }
-    }, req.session.IDTK, req.body.password_old)
+    }, req.signedCookies.dataLogin, req.body.password_old)
 
 }
 

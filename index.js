@@ -9,12 +9,13 @@ let session = require('express-session');
 
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-app.use(cookieParser());
+const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-in-production';
+app.use(cookieParser(SESSION_SECRET));
 
 app.use(session({
-    secret: 'keyboard cat',
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: true
   }))
@@ -28,13 +29,15 @@ app.use(express.json());
 app.use(express.static('./public'));
 
 app.set('view engine', 'ejs');
+// Currency helper available in every view: 12500000 -> 12.500.000
+app.locals.vnd = (n) => Number(n || 0).toLocaleString('vi-VN');
 app.use(expressLayouts);
 
 initAdminRouter(app);
 initCustomerRouter(app);
 
 app.get('*', function(req, res){
-    res.render('404.ejs', {layout: './404'});
+    res.status(404).render('404.ejs', {layout: './404'});
 });
 // app.set('layout', './customer/nolayout');
 

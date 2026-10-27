@@ -10,8 +10,8 @@ headerDB.getHeader((data) => {
 let getHome = (req, res) => {
     // console.log(header);
     homeDB.getHome((data) => {
-        // console.log(req.cookies.dataLogin);
-        res.render('customer/home.ejs', {layout: layout, sessionID: req.cookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1], dataHomeLsp: data[0], dataHomeSp: data[1]});
+        // console.log(req.signedCookies.dataLogin);
+        res.render('customer/home.ejs', {layout: layout, sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1], dataHomeLsp: data[0], dataHomeSp: data[1]});
         res.end();
     })
 }
