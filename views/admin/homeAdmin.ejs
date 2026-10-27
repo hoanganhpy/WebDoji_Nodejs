@@ -1,40 +1,59 @@
-<div>
-  <h1>Trang chủ</h1>
-  <div id="piechart" style="text-align: -webkit-center;"></div>
+<h1>Tổng quan</h1>
+<p class="page-sub">Hôm nay, <%= new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) %></p>
+
+<div class="kpis">
+    <div class="kpi"><div class="label">Doanh thu hôm nay <i class="bi bi-cash-coin"></i></div><div class="value"><%= vnd(kpi.revenueToday) %> ₫</div><div class="hint"><%= kpi.ordersToday %> đơn hàng</div></div>
+    <div class="kpi"><div class="label">Doanh thu 30 ngày <i class="bi bi-graph-up-arrow"></i></div><div class="value"><%= vnd(kpi.revenue30) %> ₫</div><div class="hint">Không tính đơn đã hủy</div></div>
+    <div class="kpi"><div class="label">Đơn chờ xác nhận <i class="bi bi-hourglass-split"></i></div><div class="value"><%= kpi.pending %></div><div class="hint"><a href="/admin/hoa-don" style="color: var(--gold-2); font-weight: 600;">Xử lý ngay →</a></div></div>
+    <div class="kpi"><div class="label">Sản phẩm <i class="bi bi-gem"></i></div><div class="value"><%= kpi.products %></div><div class="hint <%= kpi.lowStock ? 'warn' : '' %>"><%= kpi.lowStock %> sắp hết hàng · <%= kpi.customers %> khách hàng</div></div>
 </div>
 
-<% if (!dataHome[0]) { %>
-  <p style="text-align: center;">Không có dữ liệu</p>
-<% } else { %>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<!-- <script type="text/javascript" src="/admin/js/home.js"></script> -->
-<script type="text/javascript">
-  google.charts.load('current', { 'packages': ['corechart'] });
-  google.charts.setOnLoadCallback(drawChart);
-  // console.log('<%= dataHome[0].TenSanPham %>');
-  // '<% dataHome.forEach(function(data) { %>'
-  //       console.log(['<%= data.TenSanPham %>', '<%= data.SoLuong %>']);
+<div class="panel-grid">
+    <div class="panel">
+        <h3>Doanh thu 7 ngày gần nhất</h3>
+        <div class="chart-box"><canvas id="revenueChart"></canvas></div>
+    </div>
+    <div class="panel">
+        <h3>Bán chạy (30 ngày) <a href="/admin/thong-ke">Chi tiết</a></h3>
+        <% if (!top.length) { %><div class="empty-note">Chưa có dữ liệu</div><% } %>
+        <% top.forEach((t) => { %>
+            <div class="top-item"><img src="/admin/image/<%= t.imgName %>" alt=""><div><b><%= t.TenSanPham %></b><span><%= t.qty %> đã bán</span></div><div class="amt"><%= vnd(t.total) %> ₫</div></div>
+        <% }) %>
+    </div>
+</div>
 
-  //     '<% }) %>'
-  function drawChart() {
-    var data = google.visualization.arrayToDataTable([
-      ['ThongKe', 'Trong ngay'],
-      // console.log(dataHome)
-      // ['Work', '8'],
-      // ['Eat', '2'],
-      // ['TV', '4'],
-      // ['Gym', '2'],
-      // ['Sleep', '8'],
-      <% dataHome.forEach(function(data) { %>
-        ['<%= data.TenSanPham %>', <%= data.SoLuong %>],
-      <% }) %>
-    ]);
+<div class="panel">
+    <h3>Đơn hàng mới nhất <a href="/admin/hoa-don">Tất cả đơn hàng</a></h3>
+    <table>
+        <tr><th>Mã đơn</th><th>Khách hàng</th><th>Thời gian</th><th>Tổng tiền</th><th>Trạng thái</th></tr>
+        <% latest.forEach((o) => { %>
+            <tr>
+                <td><b>#<%= String(o.ID).padStart(5, '0') %></b></td>
+                <td><%= o.TenKH %></td>
+                <td><%= o.NgayMua %></td>
+                <td><%= vnd(o.TongTien) %> ₫</td>
+                <td><span class="pill <%= o.TrangThai == 2 ? 'ok' : (o.TrangThai == 3 ? 'bad' : '') %>"><%= o.TenTT %></span></td>
+            </tr>
+        <% }) %>
+    </table>
+</div>
 
-    // Optional; add a title and set the width and height of the chart
-    var options = { 'title': 'Thống kê trong ngày', 'width': 950, 'height': 550 , 'margin-right': 0};
-
-    // Display the chart inside the <div> element with id="piechart"
-    var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-    chart.draw(data, options);
-  }
-</script> <% } %>
+<script src="/vendor/chart.js/chart.umd.js"></script>
+<script>
+    const days = <%- JSON.stringify(days) %>;
+    const ctx = document.getElementById('revenueChart');
+    const grad = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    grad.addColorStop(0, 'rgba(176,141,87,.35)'); grad.addColorStop(1, 'rgba(176,141,87,0)');
+    new Chart(ctx, {
+        type: 'line',
+        data: { labels: days.map((d) => d.label), datasets: [{ data: days.map((d) => d.total), borderColor: '#b08d57', backgroundColor: grad, fill: true, tension: .35, pointRadius: 4, pointBackgroundColor: '#fff', pointBorderWidth: 2 }] },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.parsed.y.toLocaleString('vi-VN') + ' ₫' } } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#efe9df' }, ticks: { callback: (v) => (v / 1e6).toLocaleString('vi-VN') + 'tr' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>

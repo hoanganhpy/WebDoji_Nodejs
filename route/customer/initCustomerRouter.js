@@ -16,6 +16,7 @@ function isLogin(req, res, next){
 const initCustomerRouter = (app) => {
     route.get('/login', loginController.viewLogin);
     route.post('/login', loginController.postLogin);
+    route.get('/logout', loginController.logout);
 
     route.get('/signup', loginController.viewSignup);
     route.post('/signup', loginController.postSignup);
@@ -39,6 +40,7 @@ const initCustomerRouter = (app) => {
     route.get('/don-hang', isLogin, sanphamController.donHang);
     route.get('/don-hang/chi-tiet/:idDh', isLogin, sanphamController.chiTietDonHang);
     route.get('/don-hang/lich-su/', isLogin, sanphamController.lichSuDonHang);
+    route.post('/don-hang/huy/:idDh', isLogin, sanphamController.huyDonHang);
 
     return app.use('/customer/', route);
 }

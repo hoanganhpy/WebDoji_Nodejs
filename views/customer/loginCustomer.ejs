@@ -1,32 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/admin/css/Login.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-</head>
-
-<body>
-    <div class="register-photo">
-        <div class="form-container">
-            <div class="image-holder"></div>
-            <form method="post" action="/customer/login">
-                <h2 class="text-center">ĐĂNG NHẬP</h2>
-                <div class="form-group"><input class="form-control" type="text" name="taiKhoan" placeholder="Tài khoản" required></div>
-                <div class="form-group"><input class="form-control" type="password" name="password" placeholder="Mật khẩu" required></div>
-                <div class="form-group"><p style="color: red;"><%= dataLogin %></p></div>
-                <div class="form-group"><input class="btn btn-success btn-block" type="submit" value="Đăng nhập"></input></div>
-                <a class="already" href="/customer/signup">Bạn chưa có tài khoản? Đăng ký tại đây.</a>
-                <div class="form-group"><a href="/customer/home"><button class="btn btn-success btn-block" type="button" name="submit2">Xem trước <i class="fa fa-arrow-right" aria-hidden="true"></i></button></a></div>
-            </form>
-        </div>
-    </div>
-</body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-</html>
+<span class="eyebrow">Chào mừng trở lại</span>
+<h1>Đăng nhập</h1>
+<p class="muted" style="margin-bottom: 24px;">Theo dõi đơn hàng và thanh toán nhanh hơn.</p>
+<% if (error) { %><div class="alert-x"><i class="bi bi-exclamation-circle"></i> <%= error %></div><% } %>
+<form method="post" action="/customer/login">
+    <div class="field"><label for="tk">Tài khoản</label><input class="input-x" id="tk" type="text" name="taiKhoan" autocomplete="username" required></div>
+    <div class="field"><label for="mk">Mật khẩu</label><input class="input-x" id="mk" type="password" name="password" autocomplete="current-password" required></div>
+    <button class="btn-x block" type="submit" style="margin-top: 8px;">Đăng nhập</button>
+</form>
+<p class="muted" style="margin-top: 20px; font-size: 14px;">Chưa có tài khoản? <a href="/customer/signup" style="color: var(--gold-2); font-weight: 600;">Đăng ký ngay</a></p>
+<p style="font-size: 14px;"><a href="/customer/home"><i class="bi bi-arrow-left"></i> Tiếp tục xem sản phẩm</a></p>

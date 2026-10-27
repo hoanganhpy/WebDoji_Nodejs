@@ -2,7 +2,7 @@ const loginDB = require('../../model/admin/loginDB');
 
 let viewLogin = (req, res) => {
     req.session.isLoginAdmin = false;
-    res.render('admin/loginAdmin.ejs', {layout: 'admin/loginAdmin.ejs', dataLogin: ''});
+    res.render('admin/loginAdmin.ejs', {layout: false, dataLogin: ''});
 }
 
 let postLogin = (req, res) => {
@@ -10,7 +10,7 @@ let postLogin = (req, res) => {
     loginDB.selectLogin(function(data){
         // console.log(data[0]);
         if(!data[0]){
-            res.render('admin/loginAdmin.ejs', {dataLogin: 'Sai tài khoản hoặc mật khẩu'});
+            res.render('admin/loginAdmin.ejs', {layout: false, dataLogin: 'Sai tài khoản hoặc mật khẩu'});
             res.end();
         }
         else{

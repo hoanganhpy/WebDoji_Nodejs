@@ -11,7 +11,7 @@ function format_date(date) {
 
 function getDetail(callback, idSP, idLsp) {
     connection.query(
-        'SELECT sanpham.ID, ID_LoaiSanPham, xuatxu.ID as ID_XuatXu, loaisanpham.Ten as LoaiSanPham, imgName, TenSanPham, GiaNhap, GiaBan, SoLuong, xuatxu.XuatXu, show_sp, show_lsp, show_xx FROM sanpham INNER JOIN loaisanpham ON loaisanpham.ID = sanpham.ID_LoaiSanPham INNER JOIN xuatxu ON xuatxu.ID = sanpham.XuatXu WHERE sanpham.ID = ? ; ' + 
+        'SELECT sanpham.ID, ID_LoaiSanPham, xuatxu.ID as ID_XuatXu, loaisanpham.Ten as LoaiSanPham, imgName, TenSanPham, GiaNhap, GiaBan, SoLuong, xuatxu.XuatXu, show_sp, show_lsp, show_xx FROM sanpham INNER JOIN loaisanpham ON loaisanpham.ID = sanpham.ID_LoaiSanPham INNER JOIN xuatxu ON xuatxu.ID = sanpham.XuatXu WHERE sanpham.ID = ? AND show_sp != 0 AND show_lsp != 0 AND show_xx != 0 ; ' + 
         'SELECT sanpham.ID, sanpham.ID_LoaiSanPham, sanpham.TenSanPham, sanpham.imgName, sanpham.GiaBan, sanpham.SoLuong, sanpham.show_lsp, sanpham.show_xx, sanpham.show_sp, xuatxu.XuatXu FROM sanpham INNER JOIN xuatxu ON xuatxu.ID = sanpham.XuatXu WHERE show_xx != 0 AND show_sp != 0 AND show_lsp != 0 AND ID_LoaiSanPham = ? AND sanpham.ID != ? ORDER BY sanpham.update_at DESC ',
         [idSP, idLsp, idSP],
         function(err, results) {
@@ -112,7 +112,7 @@ function addToCart(callback, data, idTk) {
 
 function getCart(callback, idTk) {
     connection.query(
-        'SELECT giohang.*, sanpham.SoLuong as SoLuongSpTrongKho FROM giohang INNER JOIN sanpham ON sanpham.ID = giohang.IDSanPham WHERE giohang.IDTK = ?',
+        'SELECT giohang.*, sanpham.imgName, sanpham.SoLuong as SoLuongSpTrongKho FROM giohang INNER JOIN sanpham ON sanpham.ID = giohang.IDSanPham WHERE giohang.IDTK = ?',
         [idTk],
         function(err, results) {
             if(err) throw err;
@@ -190,7 +190,7 @@ function orderCart(callback, data, idTk) {
 
 function donHang(callback, idTk) {
     connection.query(
-        'SELECT TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, trangthai.TenTT, hoadon.ID FROM hoadon ' + 
+        'SELECT TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, hoadon.TrangThai, trangthai.TenTT, hoadon.ID FROM hoadon ' + 
         'INNER JOIN trangthai ON trangthai.ID = hoadon.TrangThai WHERE IDTK = ? AND TrangThai = 1 ORDER BY NgayMua DESC ',
         [idTk],
         function(err, results) {
@@ -205,7 +205,7 @@ function donHang(callback, idTk) {
 
 function lichSuDonHang(callback, idTk) {
     connection.query(
-        'SELECT TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, trangthai.TenTT, hoadon.ID FROM hoadon ' +
+        'SELECT TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, hoadon.TrangThai, trangthai.TenTT, hoadon.ID FROM hoadon ' +
         'INNER JOIN trangthai ON trangthai.ID = hoadon.TrangThai WHERE IDTK = ? AND (TrangThai = 2 OR TrangThai = 3) ORDER BY NgayMua DESC ',
         [idTk],
         function(err, results) {
@@ -218,16 +218,19 @@ function lichSuDonHang(callback, idTk) {
       );
 }
 
-function chiTietDonHang(callback, idDh){
+function chiTietDonHang(callback, idDh, idTk){
+    // Only the owner can see an order; unit price is the price paid, not today's price
     connection.query(
-        'SELECT TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, trangthai.TenTT FROM hoadon ' + 
-        'INNER JOIN trangthai ON trangthai.ID = hoadon.TrangThai WHERE hoadon.ID = ? ;' + 
-        'SELECT sanpham.TenSanPham, xuatxu.XuatXu, sanpham.GiaBan as DonGia, cthoadon.SoLuong, cthoadon.ThanhTien ' +
+        'SELECT hoadon.ID, TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, hoadon.TrangThai, trangthai.TenTT FROM hoadon ' +
+        'INNER JOIN trangthai ON trangthai.ID = hoadon.TrangThai WHERE hoadon.ID = ? AND hoadon.IDTK = ? ;' +
+        'SELECT sanpham.ID, sanpham.ID_LoaiSanPham, sanpham.TenSanPham, sanpham.imgName, xuatxu.XuatXu, ' +
+        'cthoadon.ThanhTien / cthoadon.SoLuong as DonGia, cthoadon.SoLuong, cthoadon.ThanhTien ' +
         'FROM cthoadon ' +
+        'INNER JOIN hoadon ON hoadon.ID = cthoadon.ID_HoaDon ' +
         'INNER JOIN sanpham ON sanpham.ID = cthoadon.IDSanPham ' +
         'INNER JOIN xuatxu ON xuatxu.ID = sanpham.XuatXu ' +
-        'WHERE cthoadon.ID_HoaDon = ?',
-        [idDh, idDh],
+        'WHERE cthoadon.ID_HoaDon = ? AND hoadon.IDTK = ?',
+        [idDh, idTk, idDh, idTk],
         function(err, results) {
             if(err) throw err;
             results[0].forEach(data => {
@@ -238,7 +241,21 @@ function chiTietDonHang(callback, idDh){
       );
 }
 
+function huyDonHang(callback, idDh, idTk){
+    // Customers can cancel their own order while it is still pending; items go back to stock
+    connection.query(
+        'UPDATE sanpham INNER JOIN cthoadon ON cthoadon.IDSanPham = sanpham.ID INNER JOIN hoadon ON hoadon.ID = cthoadon.ID_HoaDon ' +
+        'SET sanpham.SoLuong = sanpham.SoLuong + cthoadon.SoLuong WHERE hoadon.ID = ? AND hoadon.IDTK = ? AND hoadon.TrangThai = 1 ; ' +
+        'UPDATE hoadon SET TrangThai = 3 WHERE ID = ? AND IDTK = ? AND TrangThai = 1',
+        [idDh, idTk, idDh, idTk],
+        function(err, results) {
+            if(err) throw err;
+            return callback(results);
+        }
+    );
+}
+
 module.exports = {
     getDetail, getLoaiSanPham, getXuatXu, searchSanPham, addToCart, getCart, updateCart,
-    deleteCart, orderCart, donHang, chiTietDonHang, lichSuDonHang
+    deleteCart, orderCart, donHang, chiTietDonHang, lichSuDonHang, huyDonHang
 };

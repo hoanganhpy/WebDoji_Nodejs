@@ -1,60 +1,41 @@
-<div class="container" style="background: white;">
-    <div class="Tieu_de" style="margin-top: 10px;">
-        <div>
-            Đơn hàng
+<% if (!dataDonHang[0]) { %>
+<section class="section"><div class="container-x"><div class="empty"><i class="bi bi-box-seam"></i><h3>Không tìm thấy đơn hàng</h3><a class="btn-x" href="/customer/don-hang">Về đơn hàng của tôi</a></div></div></section>
+<% } else { const o = dataDonHang[0]; %>
+<section class="page-head">
+    <div class="container-x">
+        <div class="crumbs"><a href="/customer/home">Trang chủ</a><i class="bi bi-chevron-right"></i><a href="/customer/don-hang">Đơn hàng</a><i class="bi bi-chevron-right"></i><span>#<%= String(o.ID).padStart(5, '0') %></span></div>
+        <h1>Đơn hàng #<%= String(o.ID).padStart(5, '0') %></h1>
+        <p class="muted">Đặt lúc <%= o.NgayMua %> · <%- include('./partials/status.ejs', { s: o.TrangThai, label: o.TenTT }) %></p>
+    </div>
+</section>
+<section class="section" style="padding-top: 8px;">
+    <div class="container-x cart-layout">
+        <div class="card-x">
+            <h3>Sản phẩm</h3>
+            <% dataChiTietDonHang.forEach((d) => { %>
+            <div class="cart-item">
+                <div class="thumb"><img src="/admin/image/<%= d.imgName %>" alt=""></div>
+                <div>
+                    <a class="name" href="/customer/san-pham/chi-tiet/<%= d.ID_LoaiSanPham %>/<%= d.ID %>"><%= d.TenSanPham %></a>
+                    <div class="sub"><%= d.XuatXu %> · <%= vnd(d.DonGia) %> ₫ × <%= d.SoLuong %></div>
+                </div>
+                <div class="right"><span class="line-total"><%= vnd(d.ThanhTien) %> ₫</span></div>
+            </div>
+            <% }) %>
+        </div>
+        <div class="card-x">
+            <h3>Giao hàng</h3>
+            <p style="margin: 0 0 4px;"><b><%= o.TenKH %></b> · <%= o.SDT %></p>
+            <p class="muted" style="margin: 0 0 14px;"><%= o.DiaChi %></p>
+            <% if (o.GhiChu) { %><p style="font-size: 14px;"><i class="bi bi-chat-left-text"></i> <%= o.GhiChu %></p><% } %>
+            <div class="summary-row"><span class="muted">Vận chuyển</span><span>Miễn phí</span></div>
+            <div class="summary-row total"><span>Tổng cộng</span><b><%= vnd(o.TongTien) %> ₫</b></div>
+            <% if (o.TrangThai == 1) { %>
+            <form action="/customer/don-hang/huy/<%= o.ID %>" method="post" onsubmit="return confirm('Hủy đơn hàng này?')" style="margin-top: 16px;">
+                <button class="btn-x ghost block" type="submit">Hủy đơn hàng</button>
+            </form>
+            <% } %>
         </div>
     </div>
-    <h3>đơn hàng</h3>
-    <table class="table table-striped">
-        <thead>
-            <td>STT</td>
-            <td>Tên người nhận</td>
-            <td>Địa chỉ</td>
-            <td>SĐT</td>
-            <td>Tổng tiền</td>
-            <td>Ngày mua</td>
-            <td>Ghi chú</td>
-            <td>Trạng thái</td>
-        </thead>
-        <tr>
-            <td>1</td>
-            <td><%= dataDonHang[0].TenKH %></td>
-            <td><%= dataDonHang[0].DiaChi %></td>
-            <td><%= dataDonHang[0].SDT %></td>
-            <td><%= vnd(dataDonHang[0].TongTien) %> <sup>₫</sup></td>
-            <td><%= dataDonHang[0].NgayMua %></td>
-            <td><%= dataDonHang[0].GhiChu %></td>
-            <td><%= dataDonHang[0].TenTT %></td>
-        </tr>
-    </table>
-</div>
-<div class="container" style="background: white;">
-    <div class="Tieu_de" style="margin-top: 10px;">
-        <div>
-            Chi tiết đơn hàng
-        </div>
-    </div>
-
-    <h3>Chi tiết</h3>
-    <table class="table table-striped">
-        <thead>
-            <td>STT</td>
-            <td>Tên sản phẩm</td>
-            <td>Xuất xứ</td>
-            <td>Đơn giá</td>
-            <td>Số lượng</td>
-            <td>Thành tiền</td>
-        </thead>
-        <% dem = 0;
-        dataChiTietDonHang.forEach((data) => { %>
-            <tr>
-                <td><%= dem += 1 %></td>
-                <td><%= data.TenSanPham %></td>
-                <td><%= data.XuatXu %></td>
-                <td><%= vnd(data.DonGia) %> <sup>₫</sup></td>
-                <td><%= data.SoLuong %></td>
-                <td><%= vnd(data.ThanhTien) %> <sup>₫</sup></td>
-            </tr>
-        <% }) %>
-    </table>
-</div>
+</section>
+<% } %>

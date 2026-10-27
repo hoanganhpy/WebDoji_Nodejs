@@ -1,172 +1,78 @@
-<div class="container" style="background: white;">
-    <div class="Tieu_de" style="margin-top: 10px;">
-        <div>
-            Giỏ hàng
+<% let tong = 0; dataCart.forEach((d) => { tong += Number(d.ThanhTien); }); %>
+<section class="page-head">
+    <div class="container-x">
+        <div class="crumbs"><a href="/customer/home">Trang chủ</a><i class="bi bi-chevron-right"></i><span>Giỏ hàng</span></div>
+        <h1>Giỏ hàng</h1>
+        <p class="muted"><%= dataCart.length %> sản phẩm</p>
+    </div>
+</section>
+<section class="section" style="padding-top: 8px;">
+    <div class="container-x">
+    <% if (!dataCart.length) { %>
+        <div class="empty"><i class="bi bi-bag"></i><h3>Giỏ hàng đang trống</h3><p class="muted">Khám phá bộ sưu tập và chọn món trang sức bạn yêu thích.</p><a class="btn-x" href="/customer/home">Mua sắm ngay</a></div>
+    <% } else { %>
+        <div class="cart-layout">
+            <div class="card-x">
+                <h3>Sản phẩm</h3>
+                <% dataCart.forEach((d) => { %>
+                <div class="cart-item">
+                    <div class="thumb"><img src="/admin/image/<%= d.imgName %>" alt=""></div>
+                    <div>
+                        <div class="name"><%= d.TenSanPham %></div>
+                        <div class="sub"><%= d.XuatXu %> · <%= vnd(d.DonGia) %> ₫</div>
+                        <form class="inline-qty" action="/customer/cart/update" method="post">
+                            <input type="hidden" name="idSanPham" value="<%= d.IDSanPham %>">
+                            <input type="number" name="SoLuong" value="<%= d.SoLuong %>" min="1" max="<%= d.SoLuongSpTrongKho + d.SoLuong %>" aria-label="Số lượng">
+                            <button class="btn-x ghost sm" type="submit">Cập nhật</button>
+                        </form>
+                    </div>
+                    <div class="right">
+                        <span class="line-total"><%= vnd(d.ThanhTien) %> ₫</span>
+                        <form action="/customer/cart/delete" method="post">
+                            <input type="hidden" name="idCart" value="<%= d.ID %>">
+                            <button class="btn-link-x" type="submit"><i class="bi bi-trash3"></i> Xóa</button>
+                        </form>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+            <form class="card-x" action="/customer/cart/order" method="post">
+                <h3>Thanh toán</h3>
+                <div class="summary-row"><span class="muted">Tạm tính</span><span><%= vnd(tong) %> ₫</span></div>
+                <div class="summary-row"><span class="muted">Vận chuyển</span><span style="color: var(--ok); font-weight: 600;">Miễn phí</span></div>
+                <div class="summary-row total"><span>Tổng cộng</span><b><%= vnd(tong) %> ₫</b></div>
+                <hr style="border: 0; border-top: 1px solid var(--line); margin: 18px 0;">
+                <div class="field"><label>Họ và tên <span class="req">*</span></label><input class="input-x" type="text" name="ho_ten" autocomplete="name" required></div>
+                <div class="field"><label>Điện thoại <span class="req">*</span></label><input class="input-x" type="tel" name="sdt" maxlength="10" pattern="[0-9]{10}" placeholder="10 chữ số" autocomplete="tel" required></div>
+                <div class="field"><label>Tỉnh / thành phố <span class="req">*</span></label><select class="select-x" id="city" name="tinhtp" required><option value="">Chọn tỉnh / thành</option></select></div>
+                <div class="grid-2">
+                    <div class="field"><label>Quận / huyện <span class="req">*</span></label><select class="select-x" id="district" name="quanhuyen" required><option value="">Chọn</option></select></div>
+                    <div class="field"><label>Phường / xã <span class="req">*</span></label><select class="select-x" id="ward" name="xa" required><option value="">Chọn</option></select></div>
+                </div>
+                <div class="field"><label>Địa chỉ cụ thể</label><input class="input-x" type="text" name="DiaChiCuThe" placeholder="Số nhà, tên đường" autocomplete="street-address"></div>
+                <div class="field"><label>Ghi chú</label><textarea class="textarea-x" name="ghi_chu" maxlength="200" placeholder="Ví dụ: giao giờ hành chính"></textarea></div>
+                <button class="btn-x block" type="submit"><i class="bi bi-lock"></i> Đặt hàng</button>
+                <p class="muted" style="font-size: 12.5px; text-align: center; margin: 12px 0 0;">Thanh toán khi nhận hàng (COD)</p>
+            </form>
         </div>
+    <% } %>
     </div>
-
-    <h3>Thông tin giỏ hàng</h3>
-    <table class="table table-striped">
-        <thead>
-            <td>STT</td>
-            <td>Tên</td>
-            <td>Xuất xứ</td>
-            <td>Đơn giá</td>
-            <td>Số lượng</td>
-            <td>Thành tiền</td>
-            <td>Xóa</td>
-        </thead>
-        <% if(!dataCart[0]) { %>
-            <tr>
-                <td colspan="7" style="text-align: center;">Chưa có gì trong giỏ hàng !!!</td>
-            </tr>
-        <% } else { 
-                dem = 0;
-                tong = 0;
-                dataCart.forEach((data) => { %>
-                    <tr>
-                        <td><%= dem += 1 %></td>
-                        <td><%= data.TenSanPham %></td>
-                        <td><%= data.XuatXu %></td>
-                        <td><%= vnd(data.DonGia) %> <sup>₫</sup></td>
-                        <td>
-                            <form action="/customer/cart/update" method="post">
-                                <input class="input_table" type="number" name="SoLuong" value="<%= data.SoLuong %>" min="1" max="<%= data.SoLuongSpTrongKho + data.SoLuong %>" oninput="this.value = Math.abs(this.value)" required>
-                                <input type="number" hidden name="SoLuongBanDau" value="<%= data.SoLuong %>">
-                                <input type="number" hidden name="idSanPham" value="<%= data.IDSanPham %>">
-                                <input type="submit" value="Cập nhật">
-                            </form>
-                        </td>
-                        <td><%= vnd(data.ThanhTien) %> <sup>₫</sup></td>
-                        <td>
-                            <form action="/customer/cart/delete" method="post">
-                                <input type="text" hidden name="idCart" value="<%= data.ID %>">
-                                <input type="text" hidden name="idSp" value="<%= data.IDSanPham %>">
-                                <input type="text" hidden name="SoLuong" value="<%= data.SoLuong %>">
-                                <input type="submit" value="Xóa">
-                            </form>
-                        </td>
-                    </tr>
-                <%  tong += data.ThanhTien ;
-                }) %>
-                <tfoot>
-                    <td colspan="5" style="text-align: right; border-right: 1px solid #333;">Tổng:</td>
-                    <td><%= vnd(tong) %> <sup>₫</sup></td>
-                    <td></td>
-                </tfoot>
-        <% } %>
-    </table>
-    <style>
-        .input_cart,
-        textarea,
-        select {
-            min-width: 300px;
-            width: 50%;
-            background: #F7F7F7;
-            border: 1px solid #D6D6D6;
-            padding: 5px 10px;
-        }
-        .input_table{
-            max-width: 80px;
-            min-width: 80px;
-            width: 50%;
-            background: #F7F7F7;
-            border: 1px solid #D6D6D6;
-            padding: 5px 10px;
-        }
-    </style>
-        
-    <div style="margin-left: 2%;">
-        <h3>Thông tin khách hàng</h3>
-        <form action="/customer/cart/order" method="post" style="margin: auto;max-width: 50%;">
-            <div class="item_donhang">
-                <p>Họ và tên: <span>*</span></p><input class="input_cart" type="text" name="ho_ten" required>
-            </div>
-            <div class="item_donhang">
-                <p>Điện thoại: <span>*</span></p><input class="input_cart" type="tel" name="sdt" maxlength="10" pattern="[0-9]{10}" required>
-            </div>
-            <div class="item_donhang">
-                <p>Tỉnh/thành phố: <span>*</span></p><select class="" id="city" aria-label=".form-select-sm" required name="tinhtp">
-                    <option value="" selected></option>
-                </select>
-            </div>
-            <div class="item_donhang">
-                <p>Quận huyện: <span>*</span></p><select class="" id="district" aria-label=".form-select-sm" required name="quanhuyen">
-                    <option value="" selected></option>
-                </select>
-            </div>
-            <div class="item_donhang">
-                <p>Xã: <span>*</span></p><select class="" id="ward" aria-label=".form-select-sm" required name="xa">
-                    <option value="" selected></option>
-                </select>
-            </div>
-            <div class="item_donhang">
-                <p>Địa chỉ cụ thể: </p><input class="input_cart" type="text" name="DiaChiCuThe">
-            </div>
-            <div class="item_donhang">
-                <p style="align-self: flex-start;">Ghi chú: </p><textarea name="ghi_chu" id="" cols="30" rows="10" maxlength="200" placeholder="Tối đa 200 ký tự"></textarea>
-            </div>
-            <% if(dataCart[0]) { %>
-                
-            <% } else { %>
-                
-            <% } %>
-            <div style="margin-bottom: 10px; margin-left: 10%;">
-                <button type="button" class="btn btn-success"><a href="/customer/home" style="text-decoration: none;">Tiếp tục mua hàng</a></button>
-                <button class="btn btn-danger" type="submit">Đặt hàng</button>
-            </div>
-        </form>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-<script src="/customer/js/popper.min.js"></script>
-<script src="/customer/js/bootstrap.min.js"></script>
+</section>
 <script>
-    var citis = document.getElementById("city");
-    var districts = document.getElementById("district");
-    var wards = document.getElementById("ward");
-    var Parameter = {
-        url: "/customer/css/data.json", //Đường dẫn đến file chứa dữ liệu hoặc api do backend cung cấp
-        method: "GET", //do backend cung cấp
-        responseType: "application/json", //kiểu Dữ liệu trả về do backend cung cấp
-    };
-    //gọi ajax = axios => nó trả về cho chúng ta là một promise
-    var promise = axios(Parameter);
-    //Xử lý khi request thành công
-    promise.then(function(result) {
-        renderCity(result.data);
-    });
-
-    function renderCity(data) {
-        for (const x of data) {
-            citis.options[citis.options.length] = new Option(x.Name, x.Name);
-        }
-
-        // xứ lý khi thay đổi tỉnh thành thì sẽ hiển thị ra quận huyện thuộc tỉnh thành đó
-        citis.onchange = function() {
-            district.length = 1;
-            ward.length = 1;
-            if (this.value != "") {
-                const result = data.filter(n => n.Name === this.value);
-
-                for (const k of result[0].Districts) {
-                    district.options[district.options.length] = new Option(k.Name, k.Name);
-                }
-            }
+    // Province → district → ward pickers, data from /customer/css/data.json
+    (async function () {
+        const city = document.getElementById('city');
+        if (!city) return;
+        const district = document.getElementById('district');
+        const ward = document.getElementById('ward');
+        const data = await fetch('/customer/css/data.json').then((r) => r.json());
+        const fill = (el, items) => { el.length = 1; items.forEach((x) => el.add(new Option(x.Name, x.Name))); };
+        fill(city, data);
+        city.onchange = () => { const c = data.find((x) => x.Name === city.value); fill(district, c ? c.Districts : []); fill(ward, []); };
+        district.onchange = () => {
+            const c = data.find((x) => x.Name === city.value);
+            const d = c && c.Districts.find((x) => x.Name === district.value);
+            fill(ward, d ? d.Wards : []);
         };
-
-        // xứ lý khi thay đổi quận huyện thì sẽ hiển thị ra phường xã thuộc quận huyện đó
-        district.onchange = function() {
-            ward.length = 1;
-            const dataCity = data.filter((n) => n.Name === citis.value);
-            if (this.value != "") {
-                const dataWards = dataCity[0].Districts.filter(n => n.Name === this.value)[0].Wards;
-
-                for (const w of dataWards) {
-                    wards.options[wards.options.length] = new Option(w.Name, w.Name);
-                }
-            }
-        };
-    }
+    })();
 </script>

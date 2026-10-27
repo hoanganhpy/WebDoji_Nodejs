@@ -1,0 +1,29 @@
+<% if (!orders.length) { %>
+    <div class="empty"><i class="bi bi-box-seam"></i><h3><%= emptyText %></h3><a class="btn-x" href="/customer/home" style="margin-top: 8px;">Tiếp tục mua sắm</a></div>
+<% } else { %>
+<div class="table-wrap">
+<table class="table-x">
+    <thead><tr><th>Mã đơn</th><th>Ngày đặt</th><th>Người nhận</th><th>Địa chỉ</th><th>Tổng tiền</th><th>Trạng thái</th><th></th></tr></thead>
+    <tbody>
+    <% orders.forEach((o) => { %>
+        <tr>
+            <td><b>#<%= String(o.ID).padStart(5, '0') %></b></td>
+            <td><%= o.NgayMua %></td>
+            <td><%= o.TenKH %><div class="muted" style="font-size: 13px;"><%= o.SDT %></div></td>
+            <td style="max-width: 280px;"><%= o.DiaChi %></td>
+            <td class="num"><%= vnd(o.TongTien) %> ₫</td>
+            <td><%- include('./status.ejs', { s: o.TrangThai, label: o.TenTT }) %></td>
+            <td style="white-space: nowrap; text-align: right;">
+                <a class="btn-x ghost sm" href="/customer/don-hang/chi-tiet/<%= o.ID %>">Chi tiết</a>
+                <% if (o.TrangThai == 1) { %>
+                <form action="/customer/don-hang/huy/<%= o.ID %>" method="post" style="display: inline;" onsubmit="return confirm('Hủy đơn hàng này?')">
+                    <button class="btn-link-x" type="submit" style="margin-left: 10px;">Hủy</button>
+                </form>
+                <% } %>
+            </td>
+        </tr>
+    <% }) %>
+    </tbody>
+</table>
+</div>
+<% } %>

@@ -1,18 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/admin/css/header.css">
+    <title><%= typeof title !== 'undefined' ? title + ' · ' : '' %>WebDoji Admin</title>
+    <link rel="icon" href="/customer/logo-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/vendor/fonts/playfair-display/700.css">
+    <link rel="stylesheet" href="/vendor/fonts/be-vietnam-pro/400.css">
+    <link rel="stylesheet" href="/vendor/fonts/be-vietnam-pro/500.css">
+    <link rel="stylesheet" href="/vendor/fonts/be-vietnam-pro/600.css">
+    <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/admin/css/table.css">
+    <link rel="stylesheet" href="/admin/css/admin.css">
 </head>
-<body>
+<body class="admin">
     <%- include('./header.ejs') %>
-    <%- body %>
-
+    <div class="admin-main">
+        <div class="admin-content">
+            <%- body %>
+        </div>
+    </div>
     <script type="text/javascript" src="/admin/js/search_table.js"></script>
 </body>
 </html>

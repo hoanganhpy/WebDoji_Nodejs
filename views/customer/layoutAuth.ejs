@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> · WebDoji</title>
+    <link rel="icon" href="/customer/logo-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/vendor/fonts/playfair-display/600.css">
+    <link rel="stylesheet" href="/vendor/fonts/playfair-display/600-italic.css">
+    <link rel="stylesheet" href="/vendor/fonts/playfair-display/700.css">
+    <link rel="stylesheet" href="/vendor/fonts/be-vietnam-pro/400.css">
+    <link rel="stylesheet" href="/vendor/fonts/be-vietnam-pro/600.css">
+    <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/customer/css/theme.css">
+</head>
+<body>
+<div class="auth">
+    <div class="auth-visual">
+        <a class="brand" href="/customer/home"><%- include('./partials/logo.ejs') %>WebDoji</a>
+        <img src="/admin/image/sp-gnddddy060011-nhan-kim-cuong-vang-14k-pnj-1.png" alt="">
+        <blockquote>“Mỗi món trang sức là một câu chuyện — hãy để chúng tôi giúp bạn kể nó.”</blockquote>
+    </div>
+    <div class="auth-form">
+        <div class="box">
+            <%- body %>
+        </div>
+    </div>
+</div>
+</body>
+</html>

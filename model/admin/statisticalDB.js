@@ -5,7 +5,7 @@ function ThongKeTrongNgay(callback) {
         'SELECT IDSanPham, sanpham.TenSanPham, SUM(cthoadon.SoLuong) as SoLuong, sum(ThanhTien) as ThanhTien, sanpham.GiaBan FROM cthoadon ' +
         ' INNER JOIN hoadon ON cthoadon.ID_HoaDon = hoadon.ID ' +
         ' INNER JOIN sanpham ON sanpham.ID = cthoadon.IDSanPham' +
-        ' WHERE day(NgayMua) = day(now()) AND month(NgayMua) = month(now()) AND year(NgayMua) = year(now()) '+
+        ' WHERE DATE(NgayMua) = CURDATE() AND hoadon.TrangThai != 3 '+
         ' GROUP BY IDSanPham ',
         function(err, results) {
             if(err) throw err;
@@ -19,7 +19,7 @@ function ThongKeSearch(callback, dateStart, dateEnd) {
         'SELECT IDSanPham, sanpham.TenSanPham, SUM(cthoadon.SoLuong) as SoLuong, sum(ThanhTien) as ThanhTien, sanpham.GiaBan FROM cthoadon ' +
         ' INNER JOIN hoadon ON cthoadon.ID_HoaDon = hoadon.ID ' +
         ' INNER JOIN sanpham ON sanpham.ID = cthoadon.IDSanPham' +
-        ' WHERE date(NgayMua) BETWEEN ? AND ? '+
+        ' WHERE DATE(NgayMua) BETWEEN ? AND ? AND hoadon.TrangThai != 3 '+
         ' GROUP BY IDSanPham ',
         [dateStart, dateEnd],
         function(err, results) {

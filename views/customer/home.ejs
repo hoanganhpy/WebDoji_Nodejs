@@ -1,34 +1,58 @@
-<body>
-    <% dataHomeLsp.forEach((dataLsp) => { %>
-        <div class="container">
-            <div class="Tieu_de" style="margin-top: 10px;">
-                <div>
-                    <%= dataLsp.Ten %>
-                </div>
+<%
+  const featured = dataHomeSp.slice().sort((a, b) => b.GiaBan - a.GiaBan)[0];
+  const byCat = (id) => dataHomeSp.filter((p) => p.ID_LoaiSanPham == id);
+%>
+<section class="hero">
+    <div class="container-x">
+        <div>
+            <span class="eyebrow">Bộ sưu tập 2026</span>
+            <h1>Tỏa sáng theo <em>cách riêng</em> của bạn</h1>
+            <p class="lead-x">Nhẫn, lắc tay và dây chuyền vàng — kim cương được chế tác tỉ mỉ, kiểm định chất lượng và bảo hành trọn đời.</p>
+            <div class="cta">
+                <a class="btn-x" href="#collections">Khám phá bộ sưu tập <i class="bi bi-arrow-right"></i></a>
+                <% if (featured) { %><a class="btn-x ghost" href="/customer/san-pham/chi-tiet/<%= featured.ID_LoaiSanPham %>/<%= featured.ID %>">Sản phẩm nổi bật</a><% } %>
             </div>
-            <div class="row">
-                <% dem = 1; dataHomeSp.forEach((dataSp) => {
-                    if(dataLsp.ID == dataSp.ID_LoaiSanPham && dem <= 4 ){ %>
-                        <div class="col-sm-3"><a href="/customer/san-pham/chi-tiet/<%= dataLsp.ID %>/<%= dataSp.ID %>" style="color: black;">
-                            <div class="card" style="width: 18rem;">
-                            <img src="/admin/image/<%= dataSp.imgName %>" class="card-img-top" id="NgoaiNhap1" alt="..." style="max-height: 450px">
-                            <div class="card-body">
-                                Tên: <%= dataSp.TenSanPham %><br>
-                                Xuất xứ: <%= dataSp.XuatXu %><br>
-                                Giá bán: <%= vnd(dataSp.GiaBan) %> ₫<br>
-                                Số lượng:  <%= dataSp.SoLuong %>
-                            </div>
-                            </div></a>
-                        </div>
-                    <%  dem += 1
-                    }
-                }) %>
-            </div>
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end" style="margin: 10px 0px;">
-                <button class="btn btn-primary me-md-2" type="button" style="background: #00e85d;border-color: #00e85d;"><a href="/customer/san-pham/loai-san-pham/<%= dataLsp.ID %>">Xem tất cả <i class="fa fa-arrow-right" aria-hidden="true"></i></a></button>
+            <div class="stats">
+                <div><b><%= dataHomeSp.length %>+</b><span>Mẫu thiết kế</span></div>
+                <div><b><%= dataHomeLsp.length %></b><span>Dòng sản phẩm</span></div>
+                <div><b>18K</b><span>Vàng tiêu chuẩn</span></div>
             </div>
         </div>
-    <% }) %>
-    
-</body>
+        <% if (featured) { %>
+        <a class="hero-visual" href="/customer/san-pham/chi-tiet/<%= featured.ID_LoaiSanPham %>/<%= featured.ID %>">
+            <img src="/admin/image/<%= featured.imgName %>" alt="<%= featured.TenSanPham %>">
+            <div class="tag"><b><%= featured.TenSanPham %></b><span><%= vnd(featured.GiaBan) %> ₫</span></div>
+        </a>
+        <% } %>
+    </div>
+</section>
+
+<section class="section" id="collections">
+    <div class="container-x">
+        <div class="section-head">
+            <div><span class="eyebrow">Danh mục</span><h2>Mua sắm theo dòng sản phẩm</h2></div>
+        </div>
+        <div class="cat-grid">
+            <% dataHomeLsp.forEach((c) => { const first = byCat(c.ID)[0]; %>
+                <a class="cat-tile" href="/customer/san-pham/loai-san-pham/<%= c.ID %>">
+                    <% if (first) { %><img src="/admin/image/<%= first.imgName %>" alt="<%= c.Ten %>"><% } %>
+                    <span class="label"><%= c.Ten %> <i class="bi bi-arrow-up-right"></i></span>
+                </a>
+            <% }) %>
+        </div>
+    </div>
+</section>
+
+<% dataHomeLsp.forEach((c) => { const items = byCat(c.ID); if (!items.length) return; %>
+<section class="section" style="padding-top: 12px;">
+    <div class="container-x">
+        <div class="section-head">
+            <div><span class="eyebrow"><%= items.length %> sản phẩm</span><h2><%= c.Ten %></h2></div>
+            <a class="link-more" href="/customer/san-pham/loai-san-pham/<%= c.ID %>">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="grid-products">
+            <% items.slice(0, 4).forEach((p) => { %><%- include('./partials/product-card.ejs', { p }) %><% }) %>
+        </div>
+    </div>
+</section>
+<% }) %>

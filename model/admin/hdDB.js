@@ -14,7 +14,7 @@ function getHdDB(callback) {
         'SELECT hoadon.*, NgayMua, TenTT ' +
         'FROM hoadon '+
         'INNER JOIN trangthai ON trangthai.ID = hoadon.TrangThai ' +
-        'ORDER BY NgayMua ASC; ' + 
+        'ORDER BY NgayMua DESC; ' + 
         'SELECT cthoadon.IDSanPham, sanpham.TenSanPham, sanpham.imgName, xuatxu.XuatXu, sanpham.GiaBan, ' +
         'cthoadon.SoLuong, cthoadon.ThanhTien, cthoadon.ID_HoaDon ' +
         'FROM cthoadon ' +
@@ -50,7 +50,7 @@ function detailHdDB(callback, id){
 
 function nhanHdDB(callback, id){
     connection.query(
-        'UPDATE `hoadon` SET TrangThai = 2 WHERE ID = ?', [id],
+        'UPDATE `hoadon` SET TrangThai = 2 WHERE ID = ? AND TrangThai = 1', [id],
         function(err, results) {
             if(err) throw err;
             return callback(results);
@@ -60,7 +60,10 @@ function nhanHdDB(callback, id){
 
 function huyHdDB(callback, id){
     connection.query(
-        'UPDATE `hoadon` SET TrangThai= 3 WHERE ID = ? ',[id],
+        // Cancelling a pending order puts its items back in stock
+        'UPDATE sanpham INNER JOIN cthoadon ON cthoadon.IDSanPham = sanpham.ID INNER JOIN hoadon ON hoadon.ID = cthoadon.ID_HoaDon ' +
+        'SET sanpham.SoLuong = sanpham.SoLuong + cthoadon.SoLuong WHERE hoadon.ID = ? AND hoadon.TrangThai = 1 ; ' +
+        'UPDATE `hoadon` SET TrangThai = 3 WHERE ID = ? AND TrangThai = 1', [id, id],
         function(err, results) {
             if(err) throw err;
             return callback(results);

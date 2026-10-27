@@ -1,28 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/admin/css/Login.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="register-photo">
-        <div class="form-container">
-            <div class="image-holder"></div>
-            <form method="post" action="/customer/changePass">
-                <h2 class="text-center">ĐỔI MẬT KHẨU</h2>
-                <div class="form-group"><input class="form-control" type="password" name="password_old" placeholder="Mật khẩu cũ"></div>
-                <div class="form-group"><input class="form-control" type="password" name="password" placeholder="Mật khẩu mới"></div>
-                <div class="form-group"><input class="form-control" type="password" name="password_repeat" placeholder="Mật khẩu mới (Nhập lại)"></div>
-                <div class="form-group"><button class="btn btn-success btn-block" type="submit">Đổi mật khẩu</button></div>
-                <div class="form-group"><button class="btn btn-success btn-block" type="button" name="prev"><a href="/customer/home" style="color: white;">Trở về</a></button></div>
-            </form>
-        </div>
-    </div>
-</body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-</html>
+<span class="eyebrow">Bảo mật</span>
+<h1>Đổi mật khẩu</h1>
+<p class="muted" style="margin-bottom: 24px;">Sau khi đổi, bạn sẽ đăng nhập lại bằng mật khẩu mới.</p>
+<% if (error) { %><div class="alert-x"><i class="bi bi-exclamation-circle"></i> <%= error %></div><% } %>
+<form method="post" action="/customer/changePass">
+    <div class="field"><label for="old">Mật khẩu hiện tại</label><input class="input-x" id="old" type="password" name="password_old" autocomplete="current-password" required></div>
+    <div class="field"><label for="mk">Mật khẩu mới</label><input class="input-x" id="mk" type="password" name="password" minlength="6" autocomplete="new-password" required></div>
+    <div class="field"><label for="mk2">Nhập lại mật khẩu mới</label><input class="input-x" id="mk2" type="password" name="password_repeat" minlength="6" autocomplete="new-password" required></div>
+    <button class="btn-x block" type="submit" style="margin-top: 8px;">Cập nhật mật khẩu</button>
+</form>
+<p style="font-size: 14px; margin-top: 18px;"><a href="/customer/home"><i class="bi bi-arrow-left"></i> Về trang chủ</a></p>

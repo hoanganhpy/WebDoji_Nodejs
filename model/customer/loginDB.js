@@ -12,9 +12,11 @@ function selectLogin(result, tk, mk) {
 }
 
 function postSignUp(result, tk, mk) {
+    // Returns null when the username is already taken instead of crashing on the UNIQUE constraint
     connection.query(
         'INSERT INTO `taikhoan_kh`(`TenTK`, `MatKhau`, `TrangThai`, `NgayDK`) VALUES (?, SHA2(?, 256), 1, now())', [tk, mk],
         function(err, results) {
+            if(err && err.code === 'ER_DUP_ENTRY') return result(null);
             if(err) throw err;
             return result(results);
         }

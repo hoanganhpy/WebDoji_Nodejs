@@ -38,18 +38,26 @@ const q = (sql, params = []) => new Promise((ok, fail) => db.query(sql, params, 
   await q("INSERT INTO taikhoan_kh(TenTK, MatKhau, TrangThai, NgayDK) VALUES ('demo', SHA2('123456', 256), 1, now() - INTERVAL 30 DAY), ('lananh', SHA2('123456', 256), 1, now() - INTERVAL 12 DAY), ('minhtuan', SHA2('123456', 256), 1, now() - INTERVAL 3 DAY)");
 
   // Orders: [user, name, address, phone, daysAgo, status, items[[productId, qty]]]
-  const orders = [
-    [1, 'Nguyễn Văn An', '12 Lê Lợi - Bến Nghé - Quận 1 - TP. Hồ Chí Minh', '0901234567', 0, 1, [[1, 1], [4, 2]]],
-    [2, 'Trần Lan Anh', '45 Trần Phú - Phường 4 - Quận 5 - TP. Hồ Chí Minh', '0912345678', 0, 2, [[5, 1]]],
-    [3, 'Lê Minh Tuấn', '8 Nguyễn Huệ - Phú Hội - TP. Huế - Thừa Thiên Huế', '0987654321', 0, 2, [[10, 1], [3, 1]]],
-    [1, 'Nguyễn Văn An', '12 Lê Lợi - Bến Nghé - Quận 1 - TP. Hồ Chí Minh', '0901234567', 3, 2, [[8, 1]]],
-    [2, 'Trần Lan Anh', '45 Trần Phú - Phường 4 - Quận 5 - TP. Hồ Chí Minh', '0912345678', 6, 3, [[2, 1]]],
+  const people = [
+    [1, 'Nguyễn Văn An', '12 Lê Lợi - Phường Bến Nghé - Quận 1 - TP. Hồ Chí Minh', '0901234567'],
+    [2, 'Trần Lan Anh', '45 Trần Phú - Phường 4 - Quận 5 - TP. Hồ Chí Minh', '0912345678'],
+    [3, 'Lê Minh Tuấn', '8 Nguyễn Huệ - Phường Phú Hội - TP. Huế - Thừa Thiên Huế', '0987654321'],
   ];
+  // [person, daysAgo, status, items[[productId, qty]]]  status: 1 pending, 2 delivered, 3 cancelled
+  const orders = [
+    [0, 6, 2, [[3, 1], [4, 2]]], [1, 6, 2, [[9, 1]]],
+    [2, 5, 2, [[10, 1]]], [0, 5, 3, [[2, 1]]],
+    [1, 4, 2, [[5, 1], [4, 1]]], [2, 4, 2, [[7, 1]]],
+    [0, 3, 2, [[8, 1]]], [1, 3, 2, [[3, 2]]],
+    [2, 2, 2, [[6, 1]]],
+    [0, 1, 2, [[1, 1], [9, 1]]], [1, 1, 2, [[7, 1], [4, 1]]],
+    [2, 0, 2, [[10, 1], [3, 1]]], [1, 0, 1, [[5, 1]]], [0, 0, 1, [[1, 1], [4, 2]]],
+  ].map(([who, ago, st, items]) => [...people[who].slice(0, 1), ...people[who].slice(1, 2), people[who][2], people[who][3], ago, st, items]);
   for (const [u, name, addr, phone, ago, st, items] of orders) {
     const lines = items.map(([pid, n]) => [pid, n, products[pid - 1][5] * n]);
     const total = lines.reduce((s, l) => s + l[2], 0);
-    const r = await q('INSERT INTO hoadon(IDTK, TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, TrangThai) VALUES (?,?,?,?,?, now() - INTERVAL ? DAY, ?, ?)',
-      [u, name, addr, phone, total, ago, '', st]);
+    const r = await q('INSERT INTO hoadon(IDTK, TenKH, DiaChi, SDT, TongTien, NgayMua, GhiChu, TrangThai) VALUES (?,?,?,?,?, now() - INTERVAL ? DAY - INTERVAL ? MINUTE, ?, ?)',
+      [u, name, addr, phone, total, ago, Math.floor(Math.random() * 300), '', st]);
     for (const l of lines) await q('INSERT INTO cthoadon(ID_HoaDon, IDSanPham, SoLuong, ThanhTien) VALUES (?,?,?,?)', [r.insertId, ...l]);
   }
   console.log('Seed done. Admin: admin / admin123 — Customer: demo / 123456');

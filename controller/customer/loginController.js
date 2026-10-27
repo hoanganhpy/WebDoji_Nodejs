@@ -1,92 +1,69 @@
-const session = require('express-session');
 const loginDB = require('../../model/customer/loginDB');
 
+const page = (res, view, data = {}) =>
+    res.render('customer/' + view, { layout: 'customer/layoutAuth', error: '', ...data });
+
 let viewLogin = (req, res) => {
-    // req.session.isLogin = false;
     res.clearCookie('dataLogin');
-    res.render('customer/loginCustomer.ejs', {layout: 'customer/loginCustomer.ejs', dataLogin: ''});
+    page(res, 'loginCustomer.ejs', { title: 'Đăng nhập' });
 }
 
 let postLogin = (req, res) => {
     loginDB.selectLogin(function(data){
-        // console.log(data);
-        if(!data[0]){
-            res.render('customer/loginCustomer.ejs', {layout: 'customer/loginCustomer.ejs', dataLogin: 'Sai tài khoản hoặc mật khẩu'});
-            res.end();
+        if (!data[0]) {
+            return page(res, 'loginCustomer.ejs', { title: 'Đăng nhập', error: 'Sai tài khoản hoặc mật khẩu.' });
         }
-        else if (data[0].TrangThai == 0) {
-            res.render('customer/loginCustomer.ejs', {layout: 'customer/loginCustomer.ejs', dataLogin: 'Tài khoản đã bị khóa'});
-            res.end();
+        if (data[0].TrangThai == 0) {
+            return page(res, 'loginCustomer.ejs', { title: 'Đăng nhập', error: 'Tài khoản đã bị khóa. Vui lòng liên hệ cửa hàng.' });
         }
-        else{
-            res.cookie('dataLogin', { ID: data[0].ID, TenTK: data[0].TenTK }, {
-                httpOnly: true,
-                signed: true,
-                sameSite: 'lax'
-            });
-            res.redirect('/customer/home');
-            res.end();
-        }
+        res.cookie('dataLogin', { ID: data[0].ID, TenTK: data[0].TenTK }, {
+            httpOnly: true,
+            signed: true,
+            sameSite: 'lax'
+        });
+        res.redirect('/customer/home');
     }, req.body.taiKhoan, req.body.password);
 }
 
-let viewSignup = (req, res) => {
-    req.session.isLogin = false;
+let logout = (req, res) => {
     res.clearCookie('dataLogin');
-    res.render('customer/signUpCustomer.ejs', {layout: 'customer/signUpCustomer.ejs', dataLogin: ''});
+    res.redirect('/customer/home');
+}
+
+let viewSignup = (req, res) => {
+    res.clearCookie('dataLogin');
+    page(res, 'signUpCustomer.ejs', { title: 'Đăng ký' });
 }
 
 let postSignup = (req, res) => {
-    // console.log(req.body);
-    if(req.body.usename == ''){
-        res.render('customer/signUpCustomer.ejs', {layout: 'customer/signUpCustomer.ejs', dataLogin: 'Không được trống tài khoản'});
-        res.end();
-    }
-    if(req.body.password == ''){
-        res.render('customer/signUpCustomer.ejs', {layout: 'customer/signUpCustomer.ejs', dataLogin: 'Không được trống mật khẩu'});
-        res.end();
-    }
-    if(req.body.password != req.body.password_repeat){
-        res.render('customer/signUpCustomer.ejs', {layout: 'customer/signUpCustomer.ejs', dataLogin: 'Mật khẩu nhập lại không đúng'});
-        res.end();
-    }
-    if(req.body.checkboxx != 'yes'){
-        res.render('customer/signUpCustomer.ejs', {layout: 'customer/signUpCustomer.ejs', dataLogin: 'Chưa đồng ý điều khoản'});
-        res.end();
-    }
-    if(req.body.usename != '' && req.body.password != '' && (req.body.password == req.body.password_repeat) && req.body.checkboxx == 'yes'){
-        loginDB.postSignUp(function(data){
-            res.redirect('/customer/login');
-            res.end();
-        }, req.body.usename, req.body.password);
-    }
+    const { usename, password, password_repeat, checkboxx } = req.body;
+    const fail = (error) => page(res, 'signUpCustomer.ejs', { title: 'Đăng ký', error, usename });
+    if (!usename || !usename.trim()) return fail('Vui lòng nhập tên tài khoản.');
+    if (!password || password.length < 6) return fail('Mật khẩu cần ít nhất 6 ký tự.');
+    if (password !== password_repeat) return fail('Mật khẩu nhập lại không khớp.');
+    if (checkboxx !== 'yes') return fail('Bạn cần đồng ý với điều khoản sử dụng.');
+    loginDB.postSignUp(function(data){
+        if (!data) return fail('Tên tài khoản đã tồn tại.');
+        res.redirect('/customer/login');
+    }, usename.trim(), password);
 }
 
 let changePass = (req, res) => {
-    res.render('customer/changePass.ejs', {layout: 'customer/changePass.ejs'});
-    res.end();
+    page(res, 'changePass.ejs', { title: 'Đổi mật khẩu' });
 }
 
 let postChangePass = (req, res) => {
+    const fail = (error) => page(res, 'changePass.ejs', { title: 'Đổi mật khẩu', error });
+    const { password, password_repeat, password_old } = req.body;
+    if (!password || password.length < 6) return fail('Mật khẩu mới cần ít nhất 6 ký tự.');
+    if (password !== password_repeat) return fail('Mật khẩu nhập lại không khớp.');
     loginDB.isPass((data) => {
-        if (!data[0]){
-            res.send('Sai mật khẩu');
-            res.end();
-        }else{
-            const pass = req.body.password;
-            const pass_repeat = req.body.password_repeat;
-            if (pass != pass_repeat){
-                res.send('Mật khẩu nhập lại sai');
-                res.end();
-            }else{
-                loginDB.postChangePass((dataChange) => {
-                    res.redirect('/customer/login');
-                    res.end();
-                }, pass, req.signedCookies.dataLogin)
-            }
-        }
-    }, req.signedCookies.dataLogin, req.body.password_old)
-
+        if (!data[0]) return fail('Mật khẩu hiện tại không đúng.');
+        loginDB.postChangePass(() => {
+            res.clearCookie('dataLogin');
+            res.redirect('/customer/login');
+        }, password, req.signedCookies.dataLogin);
+    }, req.signedCookies.dataLogin, password_old);
 }
 
-module.exports = {viewLogin, postLogin, viewSignup, postSignup, changePass, postChangePass};
+module.exports = { logout, viewLogin, postLogin, viewSignup, postSignup, changePass, postChangePass };

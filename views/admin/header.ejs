@@ -1,29 +1,23 @@
-<div class="navbar_header">
-    <a href="/admin">Trang chủ</a>
-    <!-- <a href="#news">News</a> -->
-    <div class="dropdown_header">
-      <button class="dropbtn">Quản lý 
-        <i class="fa fa-caret-down"></i>
-      </button>
-      <div class="dropdown_header-content">
-        <a href="/admin/user">Tài khoản khách hàng</a>
-        <a href="/admin/loai-san-pham">Loại sản phẩm</a>
-        <a href="/admin/xuat-xu-san-pham">Xuất xứ</a>
-        <a href="/admin/san-pham">Sản phẩm</a>
-        <a href="/admin/hoa-don">Hóa đơn</a>
-        <a href="/admin/thong-ke">Thống kê</a>
-      </div>
-    </div> 
-    <a href="/customer/login">Website</a>
-    <div class="dropdown_header dropdown_header_icon">
-      <button class="dropbtn">
-        <i class="fa fa-caret-down"></i>
-        <i class="fa fa-user icon"></i>
-      </button>
-      <div class="dropdown_header-content">
-        <a href="#">Đổi mật khẩu</a>
-        <a href="/admin/login">Đăng xuất</a>
-        <!-- <a href="#">Link 3</a> -->
-      </div>
-    </div> 
-  </div>
+<% const nav = [
+    ['home', '/admin', 'bi-grid-1x2', 'Tổng quan'],
+    ['orders', '/admin/hoa-don', 'bi-receipt', 'Đơn hàng'],
+    ['products', '/admin/san-pham', 'bi-gem', 'Sản phẩm'],
+    ['types', '/admin/loai-san-pham', 'bi-tags', 'Loại sản phẩm'],
+    ['origins', '/admin/xuat-xu-san-pham', 'bi-globe2', 'Xuất xứ'],
+    ['users', '/admin/user', 'bi-people', 'Khách hàng'],
+    ['stats', '/admin/thong-ke', 'bi-bar-chart-line', 'Thống kê'],
+];
+const path = typeof currentPath !== 'undefined' ? currentPath : '';
+const isActive = (key, href) => (typeof active !== 'undefined' && active === key) || (href !== '/admin' && path.startsWith(href)); %>
+<aside class="sidebar">
+    <a class="sb-brand" href="/admin"><img src="/customer/logo-mark.svg" alt="">WebDoji<span>Admin</span></a>
+    <nav>
+        <% nav.forEach(([key, href, icon, label]) => { %>
+            <a href="<%= href %>" class="<%= isActive(key, href) ? 'active' : '' %>"><i class="bi <%= icon %>"></i><%= label %></a>
+        <% }) %>
+    </nav>
+    <div class="sb-foot">
+        <a href="/customer/home" target="_blank"><i class="bi bi-box-arrow-up-right"></i>Xem cửa hàng</a>
+        <a href="/admin/login"><i class="bi bi-box-arrow-left"></i>Đăng xuất</a>
+    </div>
+</aside>

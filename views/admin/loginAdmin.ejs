@@ -1,30 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/admin/css/Login.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="fontawesome-free-5.15.2-web/css/all.min.css">
+    <title>Đăng nhập quản trị · WebDoji</title>
+    <link rel="icon" href="/customer/logo-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/vendor/fonts/playfair-display/700.css">
+    <link rel="stylesheet" href="/vendor/fonts/be-vietnam-pro/400.css">
+    <link rel="stylesheet" href="/vendor/fonts/be-vietnam-pro/600.css">
+    <link rel="stylesheet" href="/admin/css/admin.css">
 </head>
-
-<body>
-    <div class="register-photo">
-        <div class="form-container">
-            <div class="image-holder"></div>
-            <form method="post" action="/admin/login">
-                <h2 class="text-center">ĐĂNG NHẬP ADMIN</h2>
-                <div class="form-group"><input class="form-control" type="text" name="taiKhoan" placeholder="Tài khoản" required></div>
-                <div class="form-group"><input class="form-control" type="password" name="password" placeholder="Mật khẩu" required></div>
-                <div class="form-group"><p style="color: red;"><%= dataLogin %></p></div>
-                <div class="form-group"><input class="btn btn-success btn-block" type="submit" value="Đăng nhập"></input></div>
-            </form>
-        </div>
-    </div>
+<body class="admin">
+<div class="admin-login">
+    <form class="card" method="post" action="/admin/login">
+        <img src="/customer/logo-mark.svg" alt="" width="40">
+        <h1>WebDoji Admin</h1>
+        <p style="color: var(--muted); margin: 0 0 22px;">Đăng nhập để quản lý cửa hàng</p>
+        <% if (dataLogin) { %><div class="err"><%= dataLogin %></div><% } %>
+        <label class="field">Tài khoản<input type="text" name="taiKhoan" autocomplete="username" required></label>
+        <label class="field">Mật khẩu<input type="password" name="password" autocomplete="current-password" required></label>
+        <button type="submit">Đăng nhập</button>
+    </form>
+</div>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
 </html>

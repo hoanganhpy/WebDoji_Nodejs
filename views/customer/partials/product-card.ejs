@@ -1,0 +1,11 @@
+<a class="p-card" href="/customer/san-pham/chi-tiet/<%= p.ID_LoaiSanPham %>/<%= p.ID %>">
+    <div class="media">
+        <% if (p.SoLuong <= 5) { %><span class="chip low">Chỉ còn <%= p.SoLuong %></span><% } %>
+        <img src="/admin/image/<%= p.imgName %>" alt="<%= p.TenSanPham %>" loading="lazy">
+    </div>
+    <div class="body">
+        <span class="origin"><%= p.XuatXu %></span>
+        <span class="name"><%= p.TenSanPham %></span>
+        <span class="price"><%= vnd(p.GiaBan) %> ₫</span>
+    </div>
+</a>

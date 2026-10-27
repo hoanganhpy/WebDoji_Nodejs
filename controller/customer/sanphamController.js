@@ -2,10 +2,6 @@ const sanphamDB = require('../../model/customer/sanphamDB');
 const headerDB = require('../../model/customer/headerDB');
 
 const layout = './customer/layoutCustomer';
-let header
-headerDB.getHeader((data) => {
-    header = data
-})
 
 var formatVnd = (number) => {
     return String(number).replace(/(.)(?=(\d{3})+$)/g,'$1,');
@@ -13,14 +9,14 @@ var formatVnd = (number) => {
 
 let getLoaisanPham = (req, res) => {
     sanphamDB.getLoaiSanPham((data) => {
-        res.render('customer/sanpham.ejs', {layout: layout, number_format: formatVnd, dataLsp: data, dataXx: false, sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1]});
+        res.render('customer/sanpham.ejs', {layout: layout, number_format: formatVnd, dataLsp: data, dataXx: false});
         res.end();
     }, req.params.idLsp);
 }
 
 let getXuatxu = (req, res) => {
     sanphamDB.getXuatXu((data) => {
-        res.render('customer/sanpham.ejs', {layout: layout, number_format: formatVnd, dataXx: data, dataLsp: false, sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1]});
+        res.render('customer/sanpham.ejs', {layout: layout, number_format: formatVnd, dataXx: data, dataLsp: false});
         res.end();
     }, req.params.idXx);
 }
@@ -28,14 +24,14 @@ let getXuatxu = (req, res) => {
 let getDetail = (req, res) => {
     sanphamDB.getDetail((data) => {
         // console.log(req.signedCookies.dataLogin);
-        res.render('customer/detailSp.ejs', {layout: layout, number_format: formatVnd, sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1], dataDetailSp: data[0], dataSameSp: data[1]});
+        res.render('customer/detailSp.ejs', {layout: layout, number_format: formatVnd, dataDetailSp: data[0], dataSameSp: data[1]});
         res.end();
     }, req.params.idSP, req.params.idLsp)
 }
 
 let searchSanPham = (req, res) => {
     sanphamDB.searchSanPham((data) => {
-        res.render('customer/search.ejs', {layout: layout, number_format: formatVnd, dataSp: data, title: req.body.search,sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1]});
+        res.render('customer/search.ejs', {layout: layout, number_format: formatVnd, dataSp: data, title: req.body.search,});
         res.end();
     }, req.body.search);
 }
@@ -54,7 +50,7 @@ let addToCart = (req, res) => {
 
 let getCart = (req, res) => {
     sanphamDB.getCart((data) => {
-        res.render('customer/cart.ejs', {layout: layout, number_format: formatVnd, dataCart: data, sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1]});
+        res.render('customer/cart.ejs', {layout: layout, number_format: formatVnd, dataCart: data});
         res.end();
     }, req.signedCookies.dataLogin.ID);
 }
@@ -82,26 +78,32 @@ let orderCart = (req, res) => {
 
 let donHang = (req, res) => {
     sanphamDB.donHang((data) => {
-        res.render('customer/donHangHienCo.ejs', {layout: layout, dataDonHang: data, number_format: formatVnd, sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1]})
+        res.render('customer/donHangHienCo.ejs', {layout: layout, dataDonHang: data, number_format: formatVnd})
         res.end();
     }, req.signedCookies.dataLogin.ID)
 }
 
 let chiTietDonHang = (req, res) => {
     sanphamDB.chiTietDonHang((data) => {
-        res.render('customer/chiTietDonHang.ejs', {layout: layout, dataDonHang: data[0], dataChiTietDonHang: data[1], number_format: formatVnd, sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1]})
+        res.render('customer/chiTietDonHang.ejs', {layout: layout, dataDonHang: data[0], dataChiTietDonHang: data[1], number_format: formatVnd})
         res.end();
-    }, req.params.idDh)
+    }, req.params.idDh, req.signedCookies.dataLogin.ID)
+}
+
+let huyDonHang = (req, res) => {
+    sanphamDB.huyDonHang(() => {
+        res.redirect('/customer/don-hang');
+    }, req.params.idDh, req.signedCookies.dataLogin.ID)
 }
 
 let lichSuDonHang = (req, res) => {
     sanphamDB.lichSuDonHang((data) => {
-        res.render('customer/lichSuDatHang.ejs', {layout: layout, dataDonHang: data, number_format: formatVnd, sessionID: req.signedCookies.dataLogin, dataHeaderSp: header[0], dataHeaderXx: header[1]})
+        res.render('customer/lichSuDatHang.ejs', {layout: layout, dataDonHang: data, number_format: formatVnd})
         res.end();
     }, req.signedCookies.dataLogin.ID)
 }
 
 module.exports = {
     getDetail, getLoaisanPham, getXuatxu, searchSanPham, addToCart, getCart, updateCart,
-    deleteCart, orderCart, donHang, chiTietDonHang, lichSuDonHang
+    deleteCart, orderCart, donHang, chiTietDonHang, lichSuDonHang, huyDonHang
 }
